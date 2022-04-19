@@ -3,33 +3,43 @@ import { StoreValidator, UpdateValidator } from 'App/Validators/User/Register'
 import { User, UserKey } from 'App/Models'
 import { faker } from '@faker-js/faker'
 import Mail from '@ioc:Adonis/Addons/Mail'
+import Database from '@ioc:Adonis/Lucid/Database'
 
 export default class RegisterController {
   public async store({ request, response }: HttpContextContract) {
     // validate request body
     const { email, redirectUrl } = await request.validate(StoreValidator)
 
-    // create user and save it
-    const user = await User.create({ email })
-    await user.save()
+    // Starts a transaction (create user + create user_key + send email)
+    await Database.transaction(async (trx) => {
+      // create user
+      const user = new User()
+      user.email = email
 
-    // generates a random uuid
-    const key = `${faker.datatype.uuid()}${new Date().getTime()}`
+      // make sure the model is using transactions
+      user.useTransaction(trx)
 
-    // create a UserKey row with the user id
-    await user.related('userKeys').create({ key })
+      // and save it
+      await user.save()
 
-    const link = `${redirectUrl.replace(/\/$/, '')}/${key}`
+      // generates a random uuid
+      const key = `${faker.datatype.uuid()}${new Date().getTime()}`
 
-    // send email
-    await Mail.send((message) => {
-      message.to(email)
-      message.from('contact@facebook.com', 'Facebook')
-      message.subject('Account Creation')
-      message.htmlView('emails/register', { link })
+      // create a UserKey row with the user id
+      await user.related('userKeys').create({ key })
+
+      const link = `${redirectUrl.replace(/\/$/, '')}/${key}`
+
+      // send email
+      await Mail.send((message) => {
+        message.to(email)
+        message.from('contact@facebook.com', 'Facebook')
+        message.subject('Account Creation')
+        message.htmlView('emails/register', { link })
+      })
+
+      return response.noContent()
     })
-
-    return response.noContent()
   }
 
   public async show({ params }: HttpContextContract) {
@@ -48,13 +58,19 @@ export default class RegisterController {
     // creates a username based on the name
     const username = name.split(' ')[0].toLocaleLowerCase() + new Date().getTime()
 
-    // save user data
-    user.merge({ name, password, username })
-    await user.save()
+    // Starts a transaction (update user + delete user_key)
+    await Database.transaction(async (trx) => {
+      // make sure the models are using the same transaction
+      user.useTransaction(trx)
+      userKey.useTransaction(trx)
 
-    // delete/invalidate key
-    await userKey.delete()
+      user.merge({ name, password, username })
+      // save user data
+      await user.save()
+      // delete/invalidate key
+      await userKey.delete()
 
-    return response.ok({ message: 'User created' })
+      return response.ok({ message: 'User created' })
+    })
   }
 }
