@@ -1,6 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
-import { StoreValidator } from 'App/Validators/User/PasswordRecovery'
+import { StoreValidator, UpdateValidator } from 'App/Validators/User/PasswordRecovery'
 import { faker } from '@faker-js/faker'
 import { User, UserKey } from 'App/Models'
 import Mail from '@ioc:Adonis/Addons/Mail'
@@ -16,6 +16,7 @@ export default class PasswordRecoveryController {
     const key = `${faker.datatype.uuid()}${new Date().getTime()}`
     const link = `${redirectUrl.replace(/\/$/, '')}/${key}`
 
+    // Transaction (user_key creation + send email)
     await Database.transaction(async (trx) => {
       // create a user_key that relates to the user
       const userKey = new UserKey()
@@ -36,5 +37,24 @@ export default class PasswordRecoveryController {
     })
   }
 
-  public async update({}: HttpContextContract) {}
+  public async update({ request, response }: HttpContextContract) {
+    const { key, password } = await request.validate(UpdateValidator)
+    const userKey = await UserKey.findByOrFail('key', key)
+    const user = await userKey.related('user').query().firstOrFail()
+
+    // Transaction (user password update + key invalidation)
+    await Database.transaction(async (trx) => {
+      user.useTransaction(trx)
+      userKey.useTransaction(trx)
+
+      // update user password
+      user.password = password
+      await user.save()
+
+      // invalidates key
+      await userKey.delete()
+
+      return response.ok({ message: 'Password reset' })
+    })
+  }
 }
