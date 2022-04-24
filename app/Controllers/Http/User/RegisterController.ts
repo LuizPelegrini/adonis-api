@@ -35,7 +35,7 @@ export default class RegisterController {
         message.to(email)
         message.from('contact@facebook.com', 'Facebook')
         message.subject('Account Creation')
-        message.htmlView('emails/register', { link })
+        message.htmlView('emails/verify-email', { link })
       })
 
       return response.noContent()
@@ -44,9 +44,9 @@ export default class RegisterController {
 
   public async show({ params }: HttpContextContract) {
     const userKey = await UserKey.findByOrFail('key', params.key)
-    const user = await userKey.related('user').query().firstOrFail()
+    await userKey.load('user')
 
-    return user
+    return userKey.user
   }
 
   public async update({ request, response }: HttpContextContract) {
