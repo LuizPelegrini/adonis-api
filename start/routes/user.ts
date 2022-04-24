@@ -6,3 +6,6 @@ Route.put('/users/register', 'User/RegisterController.update')
 
 Route.post('/users/password-recovery', 'User/PasswordRecoveryController.store')
 Route.put('/users/password-recovery', 'User/PasswordRecoveryController.update')
+
+Route.get('/users', 'User/ProfileController.show').middleware('auth')
+Route.put('/users', 'User/ProfileController.update').middleware('auth')
