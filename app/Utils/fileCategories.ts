@@ -6,6 +6,6 @@
 const fileCategories = ['avatar', 'post'] as const
 
 // type
-type FileCategory = typeof fileCategories
+type FileCategory = typeof fileCategories[number]
 
 export { fileCategories, FileCategory }

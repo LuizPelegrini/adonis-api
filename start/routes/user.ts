@@ -9,3 +9,5 @@ Route.put('/users/password-recovery', 'User/PasswordRecoveryController.update')
 
 Route.get('/users', 'User/ProfileController.show').middleware('auth')
 Route.put('/users', 'User/ProfileController.update').middleware('auth')
+
+Route.put('/users/avatar', 'User/AvatarController.update').middleware('auth')
