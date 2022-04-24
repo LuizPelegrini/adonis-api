@@ -7,8 +7,10 @@ Route.put('/users/register', 'User/RegisterController.update')
 Route.post('/users/password-recovery', 'User/PasswordRecoveryController.store')
 Route.put('/users/password-recovery', 'User/PasswordRecoveryController.update')
 
-Route.get('/users', 'User/ProfileController.show').middleware('auth')
-Route.put('/users', 'User/ProfileController.update').middleware('auth')
+Route.get('/users', 'User/MainController.show').middleware('auth')
+Route.put('/users', 'User/MainController.update').middleware('auth')
+
+Route.get('/users/search', 'User/SearchController.index').middleware('auth')
 
 Route.put('/users/avatar', 'User/AvatarController.update').middleware('auth')
 Route.delete('/users/avatar', 'User/AvatarController.destroy').middleware('auth')
