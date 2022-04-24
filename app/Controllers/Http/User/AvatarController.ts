@@ -4,6 +4,8 @@ import { FileCategory } from 'App/Utils'
 import { faker } from '@faker-js/faker'
 import Application from '@ioc:Adonis/Core/Application'
 import Database from '@ioc:Adonis/Lucid/Database'
+import fs from 'fs'
+import { promisify } from 'util'
 
 export default class AvatarController {
   public async update({ request, auth }: HttpContextContract) {
@@ -34,5 +36,26 @@ export default class AvatarController {
     })
 
     return response
+  }
+
+  public async destroy({ auth }: HttpContextContract) {
+    const user = auth.user!
+    const avatar = await user
+      .related('avatar')
+      .query()
+      .where({
+        fileCategory: 'avatar',
+      })
+      .firstOrFail()
+
+    // transaction needed (delete row in DB + delete file from storage)
+    await Database.transaction(async (trx) => {
+      avatar.useTransaction(trx)
+
+      await avatar.delete()
+
+      const unlink = promisify(fs.unlink)
+      await unlink(Application.tmpPath('uploads', avatar.fileName))
+    })
   }
 }
