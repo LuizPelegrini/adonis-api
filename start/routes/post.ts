@@ -9,3 +9,6 @@ Route.resource('/posts', 'Post/Main')
     update: ['auth'],
     destroy: ['auth'],
   })
+
+Route.post('/posts/:id/media', 'Post/MediaController.store').middleware('auth')
+Route.put('/posts/:id/media', 'Post/MediaController.update').middleware('auth')
