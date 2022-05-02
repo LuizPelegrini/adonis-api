@@ -18,8 +18,9 @@ export default class PostsController {
       user = (await User.findBy('username', username)) || auth.user!
     }
 
+    // load the user posts
     await user.load('posts', (query) => {
-      // load the user posts
+      query.orderBy('created_at', 'desc')
       query.preload('user', (query) => {
         query.select(['id', 'name', 'username']) // preload info of the user who created the post
         query.preload('avatar') // ...and its avatar
@@ -47,6 +48,8 @@ export default class PostsController {
 
     post.merge(data)
     await post.save()
+
+    return post
   }
 
   public async destroy({ response, params, auth }: HttpContextContract) {
