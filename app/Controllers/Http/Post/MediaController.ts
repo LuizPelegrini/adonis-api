@@ -5,6 +5,7 @@ import { Post } from 'App/Models'
 import Application from '@ioc:Adonis/Core/Application'
 import { cuid } from '@ioc:Adonis/Core/Helpers'
 import { FileCategory } from 'App/Utils'
+import { unlink } from 'fs/promises'
 
 export default class MediaController {
   public async store({ request, response, params, auth }: HttpContextContract) {
@@ -67,5 +68,29 @@ export default class MediaController {
     return media
   }
 
-  public async destroy({}: HttpContextContract) {}
+  public async destroy({ auth, params, response }: HttpContextContract) {
+    // Transaction needed (Remove from db + delete file)
+    await Database.transaction(async (trx) => {
+      const post = await Post.findOrFail(params.id)
+
+      if (post.userId !== auth.user!.id) {
+        return response.unauthorized()
+      }
+
+      await post.load('media')
+
+      // only deletes if post has media
+      if (post.media) {
+        const postMediaFilename = post.media.fileName
+
+        post.media.useTransaction(trx)
+
+        // delete from DB
+        await post.media.delete()
+
+        // remove from storage
+        await unlink(Application.tmpPath('uploads', postMediaFilename))
+      }
+    })
+  }
 }
