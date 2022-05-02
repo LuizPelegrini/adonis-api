@@ -60,19 +60,25 @@ export default class PostsController {
       return response.unauthorized()
     }
 
-    // Transaction needed (Delete post + Delete file from storage + Delete row from File table)
+    // Transaction needed (Delete post + Delete row from File table + Delete file from storage)
     await Database.transaction(async (trx) => {
       post.useTransaction(trx)
 
       await post.load('media')
+      let postMediaName: string | null = null
       if (post.media) {
         post.media.useTransaction(trx)
-        await unlink(Application.tmpPath('uploads', post.media.fileName)) // delete file from storage
+        postMediaName = post.media.fileName
         await post.media.delete() // delete row in File table
       }
 
-      // finally, delete the post
+      // delete the post
       await post.delete()
+
+      // if there's a media to delete...
+      if (postMediaName) {
+        await unlink(Application.tmpPath('uploads', postMediaName))
+      }
     })
   }
 }
