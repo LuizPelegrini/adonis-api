@@ -12,7 +12,7 @@ export default class Posts extends BaseSchema {
         .unsigned()
         .references('id')
         .inTable('users')
-        .onUpdate('CASCASE')
+        .onUpdate('CASCADE')
         .onDelete('CASCADE')
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
