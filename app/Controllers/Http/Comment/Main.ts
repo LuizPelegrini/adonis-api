@@ -27,5 +27,13 @@ export default class CommentController {
     await comment.save()
   }
 
-  public async destroy({}: HttpContextContract) {}
+  public async destroy({ params, auth, response }: HttpContextContract) {
+    const comment = await Comment.findOrFail(params.id)
+
+    if (auth.user!.id !== comment.userId) {
+      return response.unauthorized()
+    }
+
+    await comment.delete()
+  }
 }
