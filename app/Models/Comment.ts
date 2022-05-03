@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, belongsTo, BelongsTo } from '@ioc:Adonis/Lucid/Orm'
-import { User } from 'App/Models'
+import { User, Post } from 'App/Models'
 
 export default class Comment extends BaseModel {
   @column({ isPrimary: true })
@@ -15,10 +15,18 @@ export default class Comment extends BaseModel {
   @belongsTo(() => User)
   public user: BelongsTo<typeof User>
 
+  @belongsTo(() => Post)
+  public post: BelongsTo<typeof Post>
+
   @column({ serializeAs: null })
   public postId: number
 
-  @column.dateTime({ autoCreate: true })
+  @column.dateTime({
+    autoCreate: true,
+    serialize: (value) => {
+      return value.toFormat('yyyy-MM-dd HH:mm:ss')
+    },
+  })
   public createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })

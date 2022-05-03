@@ -8,6 +8,7 @@ import {
   HasOne,
   HasMany,
   hasMany,
+  computed,
 } from '@ioc:Adonis/Lucid/Orm'
 import { User, File, Comment } from 'App/Models'
 
@@ -45,4 +46,9 @@ export default class Post extends BaseModel {
     serialize: (value) => value.toFormat('yyyy-MM-dd HH:mm:ss'),
   })
   public updatedAt: DateTime
+
+  @computed()
+  public get commentsCount() {
+    return this.$extras.comments_count
+  }
 }
