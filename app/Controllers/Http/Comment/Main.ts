@@ -5,11 +5,9 @@ import { Comment } from 'App/Models'
 export default class CommentController {
   public async store({ request, auth }: HttpContextContract) {
     const { content, postId } = await request.validate(StoreValidator)
-
-    const comment = await Comment.create({
+    const comment = await auth.user!.related('comments').create({
       content,
       postId,
-      userId: auth.user!.id,
     })
 
     return comment
