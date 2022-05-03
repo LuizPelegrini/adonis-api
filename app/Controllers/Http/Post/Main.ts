@@ -37,6 +37,39 @@ export default class PostsController {
         query.select(['id', 'name', 'username']) // preload info of the user who created the post
         query.preload('avatar') // ...and its avatar
       })
+
+      // this will be available in the property $extras of the Post model. It can be used in a computed property
+      // count like reactions
+      query.withCount('reactions', (query) => {
+        query.where({ type: 'like' }).as('likeCount')
+      })
+
+      // count love reactions
+      query.withCount('reactions', (query) => {
+        query.where({ type: 'love' }).as('loveCount')
+      })
+
+      // count laugh reactions
+      query.withCount('reactions', (query) => {
+        query.where({ type: 'laugh' }).as('laughCount')
+      })
+
+      // count sad reactions
+      query.withCount('reactions', (query) => {
+        query.where({ type: 'sad' }).as('sadCount')
+      })
+
+      // count angry reactions
+      query.withCount('reactions', (query) => {
+        query.where({ type: 'angry' }).as('angryCount')
+      })
+
+      // attempts to get the post reaction where it's from the authenticated user
+      // return an object of reaction that is passed to the reactions property of the Post model instance
+      // it can be accessed via this.reactions in a computed property
+      query.preload('reactions', (query) => {
+        query.where({ userId: auth.user!.id }).first()
+      })
     })
 
     return user.posts
