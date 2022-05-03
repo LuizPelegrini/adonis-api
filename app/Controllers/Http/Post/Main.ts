@@ -22,6 +22,9 @@ export default class PostsController {
     await user.load('posts', (query) => {
       query.orderBy('created_at', 'desc')
       query.preload('media')
+      query.preload('comments', (query) => {
+        query.preload('user')
+      })
       query.preload('user', (query) => {
         query.select(['id', 'name', 'username']) // preload info of the user who created the post
         query.preload('avatar') // ...and its avatar
