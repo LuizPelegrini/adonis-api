@@ -10,7 +10,7 @@ import {
   hasMany,
   computed,
 } from '@ioc:Adonis/Lucid/Orm'
-import { User, File, Comment } from 'App/Models'
+import { User, File, Comment, Reaction } from 'App/Models'
 
 export default class Post extends BaseModel {
   @column({ isPrimary: true })
@@ -51,4 +51,7 @@ export default class Post extends BaseModel {
   public get commentsCount() {
     return this.$extras.comments_count
   }
+
+  @hasMany(() => Reaction, { serializeAs: null })
+  public reactions: HasMany<typeof Reaction>
 }
