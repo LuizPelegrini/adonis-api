@@ -21,7 +21,7 @@ export default class FollowsController {
   }
 
   public async destroy(ctx: HttpContextContract) {
-    const { request, params, auth, response } = ctx
+    const { request, params, auth } = ctx
 
     // validate path parameter
     const { followingId } = await request.validate({

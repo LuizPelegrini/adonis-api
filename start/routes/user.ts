@@ -17,3 +17,5 @@ Route.delete('/users/avatar', 'User/AvatarController.destroy').middleware('auth'
 
 Route.post('/users/follow/:id', 'User/FollowsController.store').middleware('auth')
 Route.delete('/users/follow/:id', 'User/FollowsController.destroy').middleware('auth')
+
+Route.get('/users/:username/profile', 'User/ProfileController.show').middleware('auth')
