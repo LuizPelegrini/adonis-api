@@ -67,7 +67,7 @@ export default class PostsController {
       // attempts to get the post reaction where it's from the authenticated user
       // return an object of reaction that is passed to the reactions property of the Post model instance
       // it can be accessed via this.reactions in a computed property
-      query.preload('reactions', (query) => {
+      query.preload('reactions', () => {
         query.where({ userId: auth.user!.id }).first()
       })
     })
