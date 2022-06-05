@@ -19,3 +19,7 @@ Route.post('/users/follow/:id', 'User/FollowsController.store').middleware('auth
 Route.delete('/users/follow/:id', 'User/FollowsController.destroy').middleware('auth')
 
 Route.get('/users/:username/profile', 'User/ProfileController.show').middleware('auth')
+
+Route.get('/users/:username/followers', 'User/FollowersController.index').middleware('auth')
+
+Route.get('/users/:username/following', 'User/FollowingController.index').middleware('auth')
