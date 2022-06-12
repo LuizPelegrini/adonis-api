@@ -13,6 +13,7 @@
 */
 
 process.env.NODE_ENV = 'test'
+process.env.LOG_LEVEL = 'fatal' // to remove the annoying log
 
 import 'reflect-metadata'
 import sourceMapSupport from 'source-map-support'
