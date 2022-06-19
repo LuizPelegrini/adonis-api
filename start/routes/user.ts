@@ -21,5 +21,6 @@ Route.delete('/users/follow/:id', 'User/FollowsController.destroy').middleware('
 Route.get('/users/:username/profile', 'User/ProfileController.show').middleware('auth')
 
 Route.get('/users/:username/followers', 'User/FollowersController.index').middleware('auth')
+Route.delete('/followers/:id', 'User/FollowersController.destroy').middleware('auth')
 
 Route.get('/users/:username/following', 'User/FollowingController.index').middleware('auth')
